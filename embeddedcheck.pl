@@ -51,12 +51,18 @@ while (<CERTS>) {
 		if ( $_ =~ m/<ds:X509Certificate>\s*(\S+)\s*$/ ) {
 			$thiscert = "$1\n";
 		}
-		while (($certline = <CERTS>) !~ m/X509Certificate/ ) {
-			$thiscert .= $certline;
-		}
-		# And sometimes the last line of certificate is on same line as closing tag
-		if ( $certline =~ m!^\s*(\S+)\s*</ds:X509Certificate>! ) {
-			$thiscert .= $1;
+		# simpleSAMLphp puts whole certificate on one line
+		if ( $thiscert =~ m!^\s*(\S+)\s*</ds:X509Certificate>! ) {
+			$DEBUG && print "DEBUG: Looks like simpleSAMLphp\n";
+			$thiscert = $1;
+		} else {
+			while (($certline = <CERTS>) !~ m/X509Certificate/ ) {
+				$thiscert .= $certline;
+			}
+			# And sometimes the last line of certificate is on same line as closing tag
+			if ( $certline =~ m!^\s*(\S+)\s*</ds:X509Certificate>! ) {
+				$thiscert .= $1;
+			}
 		}
 		chomp $thiscert;
 		$DEBUG && print "DEBUG: left a certificate block\n";
@@ -81,6 +87,9 @@ foreach $thiscert (@certificates) {
 	print "========================\n";
 	print "Processing a certificate\n";
 	print "========================\n";
+# make the certificate file standard width
+	$thiscert =~ s/\n//g;
+	$thiscert =~ s/(.{60})/$1\n/g;
 # Create temporary file
 	open(TMPFILE, "mktemp /tmp/embeddedcheck.pl.XXXXXX | ");
 	$TMPFILE=<TMPFILE>;
