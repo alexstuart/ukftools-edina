@@ -89,6 +89,7 @@ foreach $thiscert (@certificates) {
 	print "========================\n";
 # make the certificate file standard width
 	$thiscert =~ s/\n//g;
+	$thiscert =~ s/\s//g;
 	$thiscert =~ s/(.{60})/$1\n/g;
 # Create temporary file
 	open(TMPFILE, "mktemp /tmp/embeddedcheck.pl.XXXXXX | ");
