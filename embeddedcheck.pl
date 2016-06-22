@@ -91,6 +91,7 @@ foreach $thiscert (@certificates) {
 	$thiscert =~ s/\n//g;
 	$thiscert =~ s/\s//g;
 	$thiscert =~ s/(.{60})/$1\n/g;
+	chomp $thiscert;
 # Create temporary file
 	open(TMPFILE, "mktemp /tmp/embeddedcheck.pl.XXXXXX | ");
 	$TMPFILE=<TMPFILE>;
