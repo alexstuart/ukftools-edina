@@ -108,12 +108,28 @@ foreach $thiscert (@certificates) {
 	$DEBUG && system("cat $TMPFILE");
 # Run the checkcert.sh script
 #	system ("checkcert.sh $TMPFILE") || die;
-	open(CERT, "checkcert.sh $TMPFILE |") || die;
-	while(<CERT>) { 
-		s/^-e//; # I don't know why I see '-e' in the raw output. It's removed
-		print; 
-	}
-	close CERT;
+#	open(CERT, "checkcert.sh $TMPFILE |") || die;
+# Here's an incomplete reimplementation of the checkcert.sh script
+        open(CERT, "/usr/bin/openssl x509 -noout -text -in $TMPFILE |") || die;
+        while(<CERT>) {
+                s/^-e//; # I don't know why I see '-e' in the raw output. It's removed
+                print;
+        }
+        close CERT;
+        print "\n";
+        open(CERT, "cat $TMPFILE |") || die;
+        while (<CERT>) { print; }
+        print "\n";
+        open(CERT, "/usr/bin/openssl x509 -noout -fingerprint -in $TMPFILE |") || die;
+        while(<CERT>) {
+                s/^-e//; # I don't know why I see '-e' in the raw output. It's removed
+                print;
+        }
+
 # Remove temporary file	
 	unlink $TMPFILE;
+}
+
+END {
+        print "\n\nWARNING: this version of $0 doesn't have certificate checks\n\n";
 }
