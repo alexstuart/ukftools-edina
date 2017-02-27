@@ -120,7 +120,7 @@ foreach $thiscert (@certificates) {
         open(CERT, "cat $TMPFILE |") || die;
         while (<CERT>) { print; }
         print "\n";
-        open(CERT, "/usr/bin/openssl x509 -noout -fingerprint -in $TMPFILE |") || die;
+        open(CERT, "/usr/bin/openssl x509 -noout -fingerprint -sha256 -in $TMPFILE |") || die;
         while(<CERT>) {
                 s/^-e//; # I don't know why I see '-e' in the raw output. It's removed
                 print;
