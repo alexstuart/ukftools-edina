@@ -65,6 +65,7 @@ while (<CERTS>) {
 			}
 		}
 		chomp $thiscert;
+                $thiscert =~ s/\s*//gs;
 		$DEBUG && print "DEBUG: left a certificate block\n";
 		$DEBUG && print "DEBUG: found certificate is:\n$thiscert\n";
 		if ($seen{$thiscert}) { 
