@@ -5,7 +5,8 @@
 # TODO:
 # - Check that xml_grep exists on this machine
 # - Work out why system checkcert.sh outputs "-e"
-# - report on whether this is signing/encryption/useless (NB: duplicate certs)
+# - report on whether this is signing/encryption/useless
+# - Better reporting on duplicate (or missing certs)
 
 $DEBUG = 0;
 
@@ -133,4 +134,9 @@ foreach $thiscert (@certificates) {
 
 END {
         print "\n\nWARNING: this version of $0 doesn't have certificate checks\n\n";
+        print "\n\nSimple check on number of KeyDescriptors in IdP fragment file\n";
+        print "Number of KeyDescriptors in IDPSSODescriptor: ";
+        system("xml_grep 'IDPSSODescriptor/KeyDescriptor' $fragment | grep '<KeyDescriptor' | wc -l");
+        print "Number of KeyDescriptors in AttributeAuthorityDescriptor: ";
+        system("xml_grep 'AttributeAuthorityDescriptor/KeyDescriptor' $fragment | grep '<KeyDescriptor' | wc -l");
 }
