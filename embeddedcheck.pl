@@ -15,9 +15,13 @@ sub usage {
 
         print <<EOF;
 
-        usage: $0 <entity fragment file>
+        usage: $0 [-h|--help] [--debug] [--sha1] <entity fragment file>
 
         Runs the check certificate script on all the embedded certificates
+
+        --help  - shows this help screen and then exits
+        --debug - prints additional debugging information
+        --sha1  - uses the deprecated SHA1 fingerprint algorithm (we use SHA256 by default)
 
 EOF
 
@@ -26,7 +30,8 @@ EOF
 use Getopt::Long;
 my $help = '';
 my $DEBUG = '';
-GetOptions ('help' => \$help, 'debug' => \$DEBUG);
+my $sha1 = '';
+GetOptions ('help' => \$help, 'debug' => \$DEBUG, 'sha1' => \$sha1);
 
 if ($help) {
 	usage();
@@ -45,6 +50,9 @@ if ( ! -r "$ARGV[0]" ) {
 
 $fragment = $ARGV[0];
 $DEBUG && print "DEBUG: entity fragment file is $fragment\n";
+
+$fingerprint = '-sha256';
+if ($sha1) { $fingerprint = '-sha1'; }
 
 $n_certificates = 0;
 open(CERTS, "xml_grep 'ds:X509Certificate' $fragment |") || die;
@@ -126,7 +134,7 @@ foreach $thiscert (@certificates) {
         open(CERT, "cat $TMPFILE |") || die;
         while (<CERT>) { print; }
         print "\n";
-        open(CERT, "/usr/bin/openssl x509 -noout -fingerprint -sha256 -in $TMPFILE |") || die;
+        open(CERT, "/usr/bin/openssl x509 -noout -fingerprint $fingerprint -in $TMPFILE |") || die;
         while(<CERT>) {
                 s/^-e//; # I don't know why I see '-e' in the raw output. It's removed
                 print;
