@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #
 # Checks embedded certificate in an entity fragment file
 #
@@ -8,34 +8,38 @@
 # - report on whether this is signing/encryption/useless
 # - Better reporting on duplicate (or missing certs)
 
-$DEBUG = 0;
+sub usage {
 
-sub usage() {
+	my $message = shift(@_);
+	if ($message) { print "\n$message\n"; }
 
-	print <<EOF;
-	
-	usage: $0 <entity fragment file>
-	
-	Runs the check certificate script on all the embedded certificates
-	
+        print <<EOF;
+
+        usage: $0 <entity fragment file>
+
+        Runs the check certificate script on all the embedded certificates
+
 EOF
 
 }
 
-if ( ! "$ARGV[0]" ) {
-	print "\nError: You must supply a readable entity fragment file as the first argument\n";
-	usage();
-	exit 1;
-}
+use Getopt::Long;
+my $help = '';
+my $DEBUG = '';
+GetOptions ('help' => \$help, 'debug' => \$DEBUG);
 
-if ( $ARGV[0] =~ m/^-[hH]/) {
+if ($help) {
 	usage();
 	exit 0;
 }
 
+if ( $#ARGV == -1 ) {
+	usage('ERROR: You must supply a readable entity fragment file as the first argument');
+	exit 1;
+}
+
 if ( ! -r "$ARGV[0]" ) {
-	print "\nError: $ARGV[0] must be a readable entity fragment file\n";
-	usage();
+	usage("ERROR: $ARGV[0] must be a readable entity fragment file");
 	exit 2;
 }
 
@@ -132,11 +136,9 @@ foreach $thiscert (@certificates) {
 	unlink $TMPFILE;
 }
 
-END {
-        print "\n\nWARNING: this version of $0 doesn't have certificate checks\n\n";
-        print "\n\nSimple check on number of KeyDescriptors in IdP fragment file\n";
-        print "Number of KeyDescriptors in IDPSSODescriptor: ";
-        system("xml_grep 'IDPSSODescriptor/KeyDescriptor' $fragment | grep '<KeyDescriptor' | wc -l");
-        print "Number of KeyDescriptors in AttributeAuthorityDescriptor: ";
-        system("xml_grep 'AttributeAuthorityDescriptor/KeyDescriptor' $fragment | grep '<KeyDescriptor' | wc -l");
-}
+print "\n\nWARNING: this version of $0 doesn't have certificate checks\n\n";
+print "\n\nSimple check on number of KeyDescriptors in IdP fragment file\n";
+print "Number of KeyDescriptors in IDPSSODescriptor: ";
+system("xml_grep 'IDPSSODescriptor/KeyDescriptor' $fragment | grep '<KeyDescriptor' | wc -l");
+print "Number of KeyDescriptors in AttributeAuthorityDescriptor: ";
+system("xml_grep 'AttributeAuthorityDescriptor/KeyDescriptor' $fragment | grep '<KeyDescriptor' | wc -l");
